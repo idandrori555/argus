@@ -29,16 +29,15 @@ export class WorkflowOrchestrator {
     const initialGrade = await this.grader.run({ extractedText, rubric: rubricBuffer, examForm: examFormBuffer });
     console.log('📸 [Orchestrator] Initial grade:', initialGrade);
 
-    return "";
-    // // Phase 3: Audit & Error Checking (Medium cost / Standard Frontier model) - Now receives the rubric buffer
-    // const finalReport = await this.critic.run({
-    //   extractedText,
-    //   rubric: rubricBuffer,
-    //   initialGrade,
-    //   examForm: examFormBuffer
-    // });
-    //
-    // console.log('🎉 [Orchestrator] Analysis complete.');
-    // return finalReport;
+    // Phase 3: Audit & Error Checking (Medium cost / Standard Frontier model) - Now receives the rubric buffer
+    const finalReport = await this.critic.run({
+      extractedText,
+      rubric: rubricBuffer,
+      initialGrade,
+      examForm: examFormBuffer
+    });
+
+    console.log('🎉 [Orchestrator] Analysis complete.');
+    return finalReport;
   }
 }
