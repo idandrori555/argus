@@ -2,6 +2,7 @@ export interface AgentInput {
   pdfBuffer?: Buffer;
   extractedText?: string;
   rubric?: Buffer;
+  examForm?: Buffer;
   initialGrade?: string;
 }
 

@@ -8,8 +8,9 @@ const orchestrator = new WorkflowOrchestrator();
 
 // Define permanent paths in the static directory
 const staticFolder = path.join(process.cwd(), 'static');
-const staticExamTarget = path.join(staticFolder, 'exam_output.pdf');
+const staticExamTarget = './exam_output.pdf';
 const rubricPath = path.join(staticFolder, 'rubric.pdf');
+const examFormPath = path.join(staticFolder, 'exam_form.pdf');
 
 // Ensure the static directory exists on initialization
 if (!fs.existsSync(staticFolder)) {
@@ -32,16 +33,22 @@ async function runConsoleEvaluation() {
     return;
   }
 
+  if (!fs.existsSync(examFormPath)) {
+    console.error(`❌ [Error] Exam Form PDF not found at: ${examFormPath}`);
+    return;
+  }
+
   try {
     // Read files and explicitly cast/wrap them into standard Node.js Buffers to avoid Bun NonSharedBuffer type conflicts
     const examBuffer = Buffer.from(fs.readFileSync(staticExamTarget));
     const rubricBuffer = Buffer.from(fs.readFileSync(rubricPath));
+    const examFormBuffer = Buffer.from(fs.readFileSync(examFormPath));
 
-    console.log('🤖 [AI] Dispatching matrices to LLM Provider via Vercel AI SDK...');
-    console.log('⏳ Processing multi-agent review layer (Flash -> Pro -> Critic)...');
+    console.log('🤖 [AI] Dispatching matrices to LLM Provider');
+    console.log('⏳ Processing multi-agent review layer...');
 
     // Run your existing workflow passing both buffers
-    const finalReport = await orchestrator.execute(examBuffer, rubricBuffer);
+    const finalReport = await orchestrator.execute(examBuffer, rubricBuffer, examFormBuffer);
 
     // Fast score extraction for prominent console display
     const scoreMatch = finalReport.match(/(?:Score|Grade):\s*(\d+\/\d+|\d+)/i);
