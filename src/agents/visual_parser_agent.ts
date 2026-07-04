@@ -5,7 +5,6 @@ import { GEMINI_API_KEY } from '../env.ts';
 
 export class VisualParserAgent extends BaseAgent {
   private static readonly defaultModelName = 'gemini-2.0-flash';
-  private ai: GoogleGenAI;
 
   constructor(modelName: string = VisualParserAgent.defaultModelName) {
     const systemPrompt = `
