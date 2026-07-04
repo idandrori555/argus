@@ -17,6 +17,21 @@ if (!fs.existsSync(staticFolder)) {
   fs.mkdirSync(staticFolder, { recursive: true });
 }
 
+function playSoundF10() {
+  // A short, higher-pitched beep for screenshots (Frequency: 2000Hz, Duration: 100ms)
+  Bun.spawn(["powershell", "-c", "[console]::Beep(2000, 100)"]);
+}
+
+async function playSoundF11() {
+  // A two-tone success chime for PDF generation
+  Bun.spawn(["powershell", "-c", "[console]::Beep(1500, 150)"]);
+
+  // A tiny delay to let the first beep finish before the second starts
+  await new Promise((resolve) => setTimeout(resolve, 150));
+
+  Bun.spawn(["powershell", "-c", "[console]::Beep(2500, 250)"]);
+}
+
 // Core function that runs the AI evaluation and prints to the console
 async function runConsoleEvaluation() {
   console.log('\n==================================================');
@@ -72,6 +87,9 @@ async function runConsoleEvaluation() {
 // Bridge the keyboard-triggered PDF export completion directly to the evaluation execution
 iris.onExportComplete = async (freshPdfPath: string) => {
   console.log('\n📸 [Iris] PDF compilation complete.');
+
+  // Play a sound to indicate the PDF has been generated
+  playSoundF11();
 
   try {
     // Copy the fresh PDF export to the permanent static location

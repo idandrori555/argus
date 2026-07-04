@@ -1,5 +1,4 @@
 import { uIOhook, UiohookKey } from 'uiohook-napi';
-import { $ } from "bun";
 import screenshot from 'screenshot-desktop';
 import { PDFDocument } from 'pdf-lib';
 import * as fs from 'fs';
@@ -19,6 +18,21 @@ export class IrisPipeline {
 
   constructor() {
     this.handleKeyPress = this.handleKeyPress.bind(this);
+  }
+
+  playSoundF10() {
+    // A short, higher-pitched beep for screenshots (Frequency: 2000Hz, Duration: 100ms)
+    Bun.spawn(["powershell", "-c", "[console]::Beep(2000, 100)"]);
+  }
+
+  async playSoundF11() {
+    // A two-tone success chime for PDF generation
+    Bun.spawn(["powershell", "-c", "[console]::Beep(1500, 150)"]);
+
+    // A tiny delay to let the first beep finish before the second starts
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    Bun.spawn(["powershell", "-c", "[console]::Beep(2500, 250)"]);
   }
 
   public start(): void {
@@ -43,6 +57,9 @@ export class IrisPipeline {
       const imgBuffer = await screenshot({ format: 'jpg' });
       this.capturedImages.push(imgBuffer);
       console.log(`✅ Page ${this.capturedImages.length} added to queue.`);
+
+      // Play a sound to indicate the PDF has been generated
+      this.playSoundF10();
 
     } catch (error) {
       console.error('❌ Failed to capture screenshot:', error);
@@ -108,6 +125,9 @@ export class IrisPipeline {
 
       console.log(`🎉 Success! Fresh PDF created at: ${mainPdfPath}`);
       this.clear();
+
+      // Play a sound to indicate the PDF has been generated
+      this.playSoundF11();
 
       // TRIGGER THE CALLBACK: Hand off control to whoever is listening (index.ts)
       if (this.onExportComplete) {
