@@ -5,17 +5,18 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/screenshot-desktop": "^1.15.0",
+    "@types/screenshot-desktop": "^1.15.0"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
+    "@google/genai": "^2.10.0",
     "pdf-lib": "^1.17.1",
     "screenshot-desktop": "^1.15.4",
     "uiohook-napi": "^1.5.5"
   },
   "scripts": {
-    "dev": "bun run src/index.ts",
+    "dev": "bun run --env-file=.env src/index.ts"
   }
 }

@@ -8,10 +8,13 @@ export class IrisPipeline {
   private capturedImages: Buffer[] = [];
   private isListening: boolean = false;
 
+  // Define a hook that index.ts can register
+  public onExportComplete?: (pdfPath: string) => Promise<void> | void;
+
   // Define constant paths
   private readonly targetFolder = process.cwd();
   private readonly mainPdfName = 'exam_output.pdf';
-  private readonly oldFolderName = 'old';
+  private readonly oldFolderName = 'old_pdfs';
 
   constructor() {
     this.handleKeyPress = this.handleKeyPress.bind(this);
@@ -103,6 +106,11 @@ export class IrisPipeline {
 
       console.log(`🎉 Success! Fresh PDF created at: ${mainPdfPath}`);
       this.clear();
+
+      // TRIGGER THE CALLBACK: Hand off control to whoever is listening (index.ts)
+      if (this.onExportComplete) {
+        await this.onExportComplete(mainPdfPath);
+      }
     } catch (error) {
       console.error('❌ Failed to export PDF:', error);
     }
@@ -115,9 +123,9 @@ export class IrisPipeline {
 
   private async handleKeyPress(event: any): Promise<void> {
     if (event.keycode === UiohookKey.F10) {
-      await this.captureScreen();
+      await this.captureScreen().catch(console.error);
     } else if (event.keycode === UiohookKey.F11) {
-      await this.exportToPDF();
+      await this.exportToPDF().catch(console.error);
     }
   }
 }
