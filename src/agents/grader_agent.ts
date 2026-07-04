@@ -2,7 +2,7 @@ import { BaseAgent } from './base_agent.ts';
 import type { AgentInput } from './types.ts';
 
 export class GraderAgent extends BaseAgent {
-  constructor(modelName: string = 'gemini-2.0-pro') { // Or 'gemini-1.5-pro' depending on production availability
+  constructor(modelName: string = 'gemini-3.1-pro-preview') {
     const systemPrompt = `
       You are a Senior Computer Science Examiner. 
       Evaluate the student's extracted exam text against the provided rubric. 
