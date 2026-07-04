@@ -15,57 +15,6 @@ export class CriticAgent extends BaseAgent {
   }
 
   public async run(input: AgentInput): Promise<string> {
-    if (!input.extractedText || !input.rubric || !input.pdfBuffer || !input.examForm || !input.initialGrade) {
-      throw new Error(`[${this.name}] Missing state parameters for quality review.`);
-    }
-
-    console.log(`🤖 [${this.name}] Cross-checking calculations using ${this.modelName}...`);
-
-    const userMessage = `
-      === STUDENT EXAM EXTRACTED TEXT ===
-      ${input.extractedText}
-
-      === INITIAL GRADE UNDER REVIEW ===
-      ${input.initialGrade}
-    `;
-
-    const response = await this.ai.models.generateContent({
-      model: this.modelName,
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            // Inject text prompts and instructions
-            { text: `${this.systemPrompt}\n\n${userMessage}\n\n=== ATTACHED ASSETS: 1. STUDENT ANSWERS (PDF) | 2. OFFICIAL RUBRIC (PDF) | 3. ORIGINAL QUESTIONS FORM (PDF) ===` },
-
-            // Asset 1: Student's captured answers PDF
-            {
-              inlineData: {
-                data: input.pdfBuffer.toString('base64'),
-                mimeType: 'application/pdf'
-              }
-            },
-
-            // Asset 2: Official Rubric PDF
-            {
-              inlineData: {
-                data: input.rubric.toString('base64'),
-                mimeType: 'application/pdf'
-              }
-            },
-
-            // Asset 3: The original blank exam paper containing the questions
-            {
-              inlineData: {
-                data: input.examForm.toString('base64'),
-                mimeType: 'application/pdf'
-              }
-            }
-          ]
-        }
-      ]
-    });
-
-    return response.text || 'Audit review failed.';
+    return "";
   }
 }

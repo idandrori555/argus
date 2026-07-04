@@ -50,19 +50,19 @@ async function runConsoleEvaluation() {
     // Run your existing workflow passing both buffers
     const finalReport = await orchestrator.execute(examBuffer, rubricBuffer, examFormBuffer);
 
-    // Fast score extraction for prominent console display
-    const scoreMatch = finalReport.match(/(?:Score|Grade):\s*(\d+\/\d+|\d+)/i);
-    const extractedScore = scoreMatch ? scoreMatch[1] : 'Reviewed';
-
-    // Print organized results cleanly to the console
-    console.log('\n==================================================');
-    console.log(`🎯 FINAL EVALUATION SCORE: ${extractedScore}`);
-    console.log('==================================================\n');
-    console.log(finalReport);
-    console.log('\n==================================================');
-    console.log('👁️  Argus: Ready for next exam. Press F10 to capture.');
-    console.log('==================================================\n');
-
+    // // Fast score extraction for prominent console display
+    // const scoreMatch = finalReport.match(/(?:Score|Grade):\s*(\d+\/\d+|\d+)/i);
+    // const extractedScore = scoreMatch ? scoreMatch[1] : 'Reviewed';
+    //
+    // // Print organized results cleanly to the console
+    // console.log('\n==================================================');
+    // console.log(`🎯 FINAL EVALUATION SCORE: ${extractedScore}`);
+    // console.log('==================================================\n');
+    // console.log(finalReport);
+    // console.log('\n==================================================');
+    // console.log('👁️  Argus: Ready for next exam. Press F10 to capture.');
+    // console.log('==================================================\n');
+    //
   } catch (error) {
     console.error('\n❌ [Pipeline Error]: Failed to evaluate exam.');
     console.error(error);
