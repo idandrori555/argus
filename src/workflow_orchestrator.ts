@@ -1,6 +1,7 @@
 import { VisualParserAgent } from './agents/visual_parser_agent.ts';
 import { GraderAgent } from './agents/grader_agent.ts'
 import { CriticAgent } from './agents/critic_agent.ts';
+import { createProvider } from './providers/index.ts';
 
 export class WorkflowOrchestrator {
   private parser: VisualParserAgent;
@@ -8,10 +9,22 @@ export class WorkflowOrchestrator {
   private critic: CriticAgent;
 
   constructor() {
-    // Easily parameterized or injected via a factory pattern later if needed
-    this.parser = new VisualParserAgent();
-    this.grader = new GraderAgent();
-    this.critic = new CriticAgent();
+    const parserCfg = {
+      provider: Bun.env['ARGUS_PARSER_PROVIDER'] ?? 'gemini',
+      model: Bun.env['ARGUS_PARSER_MODEL'] ?? 'gemini-2.5-flash',
+    };
+    const graderCfg = {
+      provider: Bun.env['ARGUS_GRADER_PROVIDER'] ?? 'gemini',
+      model: Bun.env['ARGUS_GRADER_MODEL'] ?? 'gemini-2.5-flash',
+    };
+    const criticCfg = {
+      provider: Bun.env['ARGUS_CRITIC_PROVIDER'] ?? 'gemini',
+      model: Bun.env['ARGUS_CRITIC_MODEL'] ?? 'gemini-2.5-flash',
+    };
+
+    this.parser = new VisualParserAgent(createProvider(parserCfg.provider), parserCfg.model);
+    this.grader = new GraderAgent(createProvider(graderCfg.provider), graderCfg.model);
+    this.critic = new CriticAgent(createProvider(criticCfg.provider), criticCfg.model);
   }
 
   /**

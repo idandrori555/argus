@@ -1,8 +1,9 @@
 import { BaseAgent } from './base_agent.ts';
 import type { AgentInput } from './types.ts';
+import type { LLMProvider } from '../providers/types.ts';
 
 export class GraderAgent extends BaseAgent {
-  constructor(modelName: string = 'gemini-2.5-flash') {
+  constructor(provider: LLMProvider, modelName: string = 'gemini-2.5-flash') {
     const systemPrompt = `
 # ROLE & OBJECTIVE
 You are a meticulous Senior Examiner specialized in grading Bagrut (Israeli Matriculation) exams. Your task is to evaluate the provided student exam text against the official grading rubric with absolute precision, rigor, and consistency. 
@@ -43,7 +44,7 @@ You must output your evaluation exactly in the following Markdown template for e
 - Independence: Evaluate each question independently. Do not let a poor answer on Question 1 bias your grading of Question 2.
 - Direct Output: Begin directly with the first question evaluation. Do not include any introductory or concluding conversational text.
 `;
-    super('Grader', modelName, systemPrompt);
+    super('Grader', provider, modelName, systemPrompt);
   }
 
   public async run(input: AgentInput): Promise<string> {
@@ -51,29 +52,17 @@ You must output your evaluation exactly in the following Markdown template for e
     if (!extractedText || !rubric || !examForm) throw new Error('Missing input data.');
 
     try {
-      const response = await this.ai.models.generateContent({
+      const response = await this.provider.generate({
         model: this.modelName,
-        config: {
-          systemInstruction: this.systemPrompt,
-        },
+        systemPrompt: this.systemPrompt,
         contents: [
-          "STUDENTS SOLUTION (RAW TEXT): \n" + extractedText + "STUDENT SOLUTION END\n",
-          {
-            inlineData: {
-              mimeType: 'application/pdf',
-              data: rubric.toString('base64'),
-            },
-          },
-          {
-            inlineData: {
-              mimeType: 'application/pdf',
-              data: examForm.toString('base64'),
-            },
-          },
+          { type: 'text', text: `STUDENTS SOLUTION (RAW TEXT):\n${extractedText}\nSTUDENT SOLUTION END\n` },
+          { type: 'pdf', data: rubric },
+          { type: 'pdf', data: examForm },
         ],
       });
 
-      return response.text ?? "No Response!";
+      return response;
     } catch (err) {
       console.error(err);
       return "No Response!";

@@ -1,18 +1,17 @@
-import { GoogleGenAI } from "@google/genai";
 import type { Agent, AgentInput } from "./types.ts";
-import { GEMINI_API_KEY } from '../env.ts';
+import type { LLMProvider } from '../providers/types.ts';
 
 export abstract class BaseAgent implements Agent {
   public readonly name: string;
   protected readonly systemPrompt: string;
   protected readonly modelName: string;
-  protected ai: GoogleGenAI;
+  protected readonly provider: LLMProvider;
 
-  constructor(name: string, modelName: string, systemPrompt: string) {
+  constructor(name: string, provider: LLMProvider, modelName: string, systemPrompt: string) {
     this.name = name;
+    this.provider = provider;
     this.modelName = modelName;
     this.systemPrompt = systemPrompt;
-    this.ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY }); // Loads GEMINI_API_KEY from environment variables
   }
 
   // Every specific agent must implement their own execution logic

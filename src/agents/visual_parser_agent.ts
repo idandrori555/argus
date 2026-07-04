@@ -1,8 +1,9 @@
 import { BaseAgent } from './base_agent.ts';
 import type { AgentInput } from './types.ts';
+import type { LLMProvider } from '../providers/types.ts';
 
 export class VisualParserAgent extends BaseAgent {
-  constructor(modelName: string = "gemini-2.5-flash") {
+  constructor(provider: LLMProvider, modelName: string = "gemini-2.5-flash") {
     const systemPrompt = `
 # ROLE & OBJECTIVE
 You are a high-precision OCR Parse Engine specialized in analyzing and digitizing Bagrut (Israeli Matriculation) exam papers. Your goal is to extract text, student handwriting, structures, and visuals with 100% fidelity. Do not paraphrase; transcribe exactly what is present.
@@ -35,7 +36,7 @@ Process the document and structure your output according to these rules:
 - NO Commentary: Do not add meta-commentary, conversational filler, or assumptions about correctness. Output ONLY the parsed content.
 - Unclear Text: If a handwritten word or symbol is completely illegible due to scanning artifacts, replace it with "[ILLEGIBLE]"—do not guess.
 `;
-    super('VisualParser', modelName, systemPrompt);
+    super('VisualParser', provider, modelName, systemPrompt);
   }
 
   public async run(input: AgentInput): Promise<string> {
@@ -43,22 +44,13 @@ Process the document and structure your output according to these rules:
     if (!pdfBuffer) throw new Error('Missing PDF buffer.');
 
     try {
-      const response = await this.ai.models.generateContent({
+      const response = await this.provider.generate({
         model: this.modelName,
-        config: {
-          systemInstruction: this.systemPrompt,
-        },
-        contents: [
-          {
-            inlineData: {
-              mimeType: 'application/pdf',
-              data: pdfBuffer.toString('base64'),
-            },
-          },
-        ],
+        systemPrompt: this.systemPrompt,
+        contents: [{ type: 'pdf', data: pdfBuffer }],
       });
 
-      return response.text ?? "No Response!";
+      return response;
     } catch (err) {
       console.error(err);
       return "No Response!";
