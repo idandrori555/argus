@@ -1,43 +1,31 @@
 import { IrisPipeline } from './iris/iris.ts';
-import { WorkflowOrchestrator } from './workflow_orchestrator.ts';
-import * as fs from 'fs';
+import { ArgusServer } from './server';
 
-// Initialize both standalone products
 const iris = new IrisPipeline();
-const brain = new WorkflowOrchestrator();
+const server = new ArgusServer();
 
-// Define the rubric/criteria (In production, you'll read this from a static file)
-const dummyRubric = `
+const officialRubric = `
   Question 1 (Binary Trees): 20 points. Deduct 5 points if traversal is out of order.
   Question 2 (Automata): 30 points. Deduct 10 points for missing trap states.
 `;
 
-// Register the bridge between Iris and Brain
+// Start the UI server engine
+server.start(3000);
+
+// Bridge the Iris capture finish callback right into the production server handler
 iris.onExportComplete = async (pdfPath: string) => {
   console.log('\n==================================================');
-  console.log('🧠 [Main] Handing over control to Argus Brain...');
+  console.log('📸 [Iris] Captured exam ready. Relaying to Server...');
   console.log('==================================================\n');
 
-  try {
-    // Read the newly minted PDF into memory
-    const pdfBuffer = fs.readFileSync(pdfPath);
-
-    // Execute the asynchronous agentic line
-    const finalEvaluationReport = await brain.execute(pdfBuffer, dummyRubric);
-
-    console.log('\n============================= REPORT START =============================');
-    console.log(finalEvaluationReport);
-    console.log('============================== REPORT END ==============================\n');
-
-  } catch (error) {
-    console.error('❌ [Main] Error running the AI agent pipeline:', error);
-  }
+  // Triggers the agent suite background process & autoupdates the connected UI dashboard
+  await server.processExam(pdfPath, officialRubric);
 };
 
-// Start the capture lifecycle
+// Start the hardware keyboard event hooks
 iris.start();
 
-// Graceful exit cleanup
+// Standard OS runtime process signal cleanup listener
 process.on('SIGINT', () => {
   iris.stop();
   process.exit(0);
