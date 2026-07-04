@@ -1,4 +1,5 @@
 import { uIOhook, UiohookKey } from 'uiohook-napi';
+import { $ } from "bun";
 import screenshot from 'screenshot-desktop';
 import { PDFDocument } from 'pdf-lib';
 import * as fs from 'fs';
@@ -18,6 +19,27 @@ export class IrisPipeline {
 
   constructor() {
     this.handleKeyPress = this.handleKeyPress.bind(this);
+  }
+
+  /**
+   * Triggers native Windows hardware beeps via a lightweight PowerShell background process.
+   */
+  private async playWindowsBeep(frequencies: number[], durations: number[]): Promise<void> {
+    // Build a PowerShell command string stringing the tones together
+    const commands = frequencies.map((freq, i) => `[Console]::Beep(${freq}, ${durations[i]})`).join('; ');
+
+    // Execute silently in the background
+    await $`powershell -Command "${commands}"`;
+  }
+
+  private playSoundF10(): void {
+    // Short, higher-pitched beep for screenshots (2000Hz, 100ms)
+    this.playWindowsBeep([2000], [100]);
+  }
+
+  private playSoundF11(): void {
+    // Two-tone success chime for PDF generation (1500Hz for 150ms -> 2500Hz for 250ms)
+    this.playWindowsBeep([1500, 2500], [150, 250]);
   }
 
   public start(): void {
@@ -42,6 +64,9 @@ export class IrisPipeline {
       const imgBuffer = await screenshot({ format: 'jpg' });
       this.capturedImages.push(imgBuffer);
       console.log(`✅ Page ${this.capturedImages.length} added to queue.`);
+
+      // Play a sound to indicate the capture is complete
+      this.playSoundF10();
     } catch (error) {
       console.error('❌ Failed to capture screenshot:', error);
     }
@@ -106,6 +131,9 @@ export class IrisPipeline {
 
       console.log(`🎉 Success! Fresh PDF created at: ${mainPdfPath}`);
       this.clear();
+
+      // Play a sound to indicate the PDF is complete
+      this.playSoundF11();
 
       // TRIGGER THE CALLBACK: Hand off control to whoever is listening (index.ts)
       if (this.onExportComplete) {
