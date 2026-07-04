@@ -11,15 +11,15 @@ export class WorkflowOrchestrator {
   constructor() {
     const parserCfg = {
       provider: Bun.env['ARGUS_PARSER_PROVIDER'] ?? 'gemini',
-      model: Bun.env['ARGUS_PARSER_MODEL'] ?? 'gemini-2.5-flash',
+      model: Bun.env['ARGUS_PARSER_MODEL'] ?? 'gemini-3.1-flash-lite',
     };
     const graderCfg = {
       provider: Bun.env['ARGUS_GRADER_PROVIDER'] ?? 'gemini',
-      model: Bun.env['ARGUS_GRADER_MODEL'] ?? 'gemini-2.5-flash',
+      model: Bun.env['ARGUS_GRADER_MODEL'] ?? 'gemini-3.1-flash-lite',
     };
     const criticCfg = {
       provider: Bun.env['ARGUS_CRITIC_PROVIDER'] ?? 'gemini',
-      model: Bun.env['ARGUS_CRITIC_MODEL'] ?? 'gemini-2.5-flash',
+      model: Bun.env['ARGUS_CRITIC_MODEL'] ?? 'gemini-3.1-flash-lite',
     };
 
     this.parser = new VisualParserAgent(createProvider(parserCfg.provider), parserCfg.model);

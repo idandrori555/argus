@@ -20,7 +20,6 @@ export class GeminiProvider implements LLMProvider {
         inlineData: {
           mimeType: 'application/pdf',
           data: c.data.toString('base64'),
-          ...(c.displayName ? { displayName: c.displayName } : {}),
         },
       };
     });
