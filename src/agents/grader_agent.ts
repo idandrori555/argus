@@ -19,9 +19,6 @@ export class GraderAgent extends BaseAgent {
     console.log(`🤖 [${this.name}] Evaluating answers using high-reasoning engine ${this.modelName}...`);
 
     const userMessage = `
-      === OFFICIAL CRITERIA / RUBRIC ===
-      ${input.rubric}
-
       === STUDENT EXAM TEXT ===
       ${input.extractedText}
     `;
@@ -29,8 +26,20 @@ export class GraderAgent extends BaseAgent {
     const response = await this.ai.models.generateContent({
       model: this.modelName,
       contents: [
-        // Setting system instruction via the standard contents block sequence
-        { role: 'user', parts: [{ text: `${this.systemPrompt}\n\n${userMessage}` }] }
+        {
+          role: 'user',
+          parts: [
+            // Inject the system prompt and textual payload
+            { text: `${this.systemPrompt}\n\n${userMessage}\n\n=== OFFICIAL CRITERIA / RUBRIC (ATTACHED PDF) ===` },
+            // Pass the rubric PDF binary safely using standard Gemini API inlineData specifications
+            {
+              inlineData: {
+                data: input.rubric.toString('base64'),
+                mimeType: 'application/pdf'
+              }
+            }
+          ]
+        }
       ]
     });
 

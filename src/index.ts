@@ -9,7 +9,7 @@ const orchestrator = new WorkflowOrchestrator();
 // Define permanent paths in the static directory
 const staticFolder = path.join(process.cwd(), 'static');
 const staticExamTarget = path.join(staticFolder, 'exam_output.pdf');
-const rubricPath = path.join(staticFolder, 'rubric.txt');
+const rubricPath = path.join(staticFolder, 'rubric.pdf');
 
 // Ensure the static directory exists on initialization
 if (!fs.existsSync(staticFolder)) {
@@ -28,19 +28,20 @@ async function runConsoleEvaluation() {
   }
 
   if (!fs.existsSync(rubricPath)) {
-    console.warn(`⚠️ [Warning] Rubric missing. Creating an empty template.`);
-    fs.writeFileSync(rubricPath, 'Insert official grading criteria matrix here.');
+    console.error(`❌ [Error] Rubric PDF not found at: ${rubricPath}`);
+    return;
   }
 
   try {
-    const pdfBuffer = fs.readFileSync(staticExamTarget);
-    const rubricText = fs.readFileSync(rubricPath, 'utf-8');
+    // Read files and explicitly cast/wrap them into standard Node.js Buffers to avoid Bun NonSharedBuffer type conflicts
+    const examBuffer = Buffer.from(fs.readFileSync(staticExamTarget));
+    const rubricBuffer = Buffer.from(fs.readFileSync(rubricPath));
 
-    console.log('🤖 [AI] Dispatching matrix to LLM Provider via Vercel AI SDK...');
+    console.log('🤖 [AI] Dispatching matrices to LLM Provider via Vercel AI SDK...');
     console.log('⏳ Processing multi-agent review layer (Flash -> Pro -> Critic)...');
 
-    // Run your existing workflow
-    const finalReport = await orchestrator.execute(pdfBuffer, rubricText);
+    // Run your existing workflow passing both buffers
+    const finalReport = await orchestrator.execute(examBuffer, rubricBuffer);
 
     // Fast score extraction for prominent console display
     const scoreMatch = finalReport.match(/(?:Score|Grade):\s*(\d+\/\d+|\d+)/i);
