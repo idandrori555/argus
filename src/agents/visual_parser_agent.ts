@@ -2,7 +2,7 @@ import { BaseAgent } from './base_agent.ts';
 import type { AgentInput } from './types.ts';
 
 export class VisualParserAgent extends BaseAgent {
-  private static readonly defaultModelName = 'gemini-3-flash-preview';
+  private static readonly defaultModelName = 'gemini-2.5-flash';
 
   constructor(modelName: string = VisualParserAgent.defaultModelName) {
     const systemPrompt = `
