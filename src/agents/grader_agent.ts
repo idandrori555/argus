@@ -48,18 +48,25 @@ You must output your evaluation exactly in the following Markdown template for e
   }
 
   public async run(input: AgentInput): Promise<string> {
-    const { extractedText, rubric, examForm } = input;
-    if (!extractedText || !rubric || !examForm) throw new Error('Missing input data.');
+    const { extractedText, rubric, examForm, pdfBuffer } = input;
+    if (!rubric || !examForm) throw new Error('Missing rubric or exam form.');
+    if (!extractedText && !pdfBuffer) throw new Error('Missing student solution (text or PDF).');
 
     try {
       const response = await this.provider.generate({
         model: this.modelName,
         systemPrompt: this.systemPrompt,
-        contents: [
-          { type: 'text', text: `STUDENTS SOLUTION (RAW TEXT):\n${extractedText}\nSTUDENT SOLUTION END\n` },
-          { type: 'pdf', data: rubric },
-          { type: 'pdf', data: examForm },
-        ],
+        contents: extractedText
+          ? [
+              { type: 'text', text: `STUDENTS SOLUTION (RAW TEXT):\n${extractedText}\nSTUDENT SOLUTION END\n` },
+              { type: 'pdf', data: rubric },
+              { type: 'pdf', data: examForm },
+            ]
+          : [
+              { type: 'pdf', data: pdfBuffer! },
+              { type: 'pdf', data: rubric },
+              { type: 'pdf', data: examForm },
+            ],
       });
 
       return response;
