@@ -1,6 +1,7 @@
 import { VisualParserAgent } from './agents/visual_parser_agent.ts';
 import { GraderAgent } from './agents/grader_agent.ts'
 import { CriticAgent } from './agents/critic_agent.ts';
+import { MarkdownParserAgent } from './agents/markdown_parser_agent.ts';
 import { createProvider } from './providers/index.ts';
 import type { Agent, AgentInput } from './agents/types.ts';
 
@@ -27,6 +28,9 @@ const AGENT_REGISTRY: Record<string, AgentDef> = {
   critic: {
     create: (p, m) => new CriticAgent(createProvider(p), m),
   },
+  markdown: {
+    create: (p, m) => new MarkdownParserAgent(createProvider(p), m),
+  },
 };
 
 function getAgentConfig(agentName: string): { provider: string; model: string } {
@@ -35,6 +39,7 @@ function getAgentConfig(agentName: string): { provider: string; model: string } 
     parser: { provider: 'gemini', model: 'gemini-3-flash-preview' },
     grader: { provider: 'gemini', model: 'gemini-3.1-pro-preview' },
     critic: { provider: 'gemini', model: 'gemini-3-flash-preview' },
+    markdown: { provider: 'gemini', model: 'gemini-3-flash-preview' },
   };
   const d = defaults[agentName] ?? { provider: 'gemini', model: 'gemini-3-flash-preview' };
   return {
@@ -47,7 +52,7 @@ export class WorkflowOrchestrator {
   private pipeline: PipelineStep[] = [];
 
   constructor() {
-    const raw = Bun.env['ARGUS_PIPELINE'] ?? 'grader';
+    const raw = Bun.env['ARGUS_PIPELINE'] ?? 'grader,markdown';
     const names = raw.split(',').map(s => s.trim()).filter(Boolean);
 
     for (const name of names) {
